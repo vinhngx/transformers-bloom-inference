@@ -31,7 +31,7 @@ class Model:
         # forward pass to get next token
         res = self.model.forward(input_ids)
         # omit the 1st token
-        print(res.logits)
+        #print(res.logits)
         logprobs = torch.gather(res.logits[:,:-1,:], 2, input_ids[:,1:, None]).squeeze(-1).to(torch.float32)
         logprobs = logprobs.detach().cpu().numpy()
         return logprobs.tolist(), float(np.mean(logprobs)) # Normalization by number of tokens      
