@@ -4,6 +4,7 @@ import os
 import subprocess
 import time
 from typing import List
+import numpy as np
 
 import grpc
 from mii.server_client import MIIServerClient
@@ -123,6 +124,11 @@ class ModelDeployment(MIIServerClient):
         response = await self.stubs[stub_id].Generate(req)
         return response
 
+    def logprob(self, context) -> np.float:
+
+        response = self.model.logprob(context)
+        return response
+    
     def generate(self, **kwargs) -> GenerateResponse:
         if self.use_grpc_server:
             if "request" in kwargs:
@@ -156,7 +162,8 @@ class ModelDeployment(MIIServerClient):
                 raise response
             else:
                 return response
-
+            
+            
     def tokenize(self, request: TokenizeRequest) -> TokenizeResponse:
         if self.use_grpc_server:
             response = self.tokenizer(request.text, padding=request.padding)

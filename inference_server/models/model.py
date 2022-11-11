@@ -4,6 +4,7 @@ from functools import partial
 from typing import Union
 
 import torch
+import numpy as np
 
 from huggingface_hub import snapshot_download
 from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM
@@ -20,7 +21,21 @@ class Model:
         self.input_device = None
         self.max_input_length = args.max_input_length
         self.max_batch_size = args.max_batch_size
-
+   
+    def logprob(
+        self,
+        context: str,      
+    ) -> float:
+        
+        input_ids = self.tokenizer(context, return_tensors="pt").input_ids
+        # forward pass to get next token
+        res = self.model.forward(input_ids)
+        # omit the 1st token
+        print(res.logits)
+        logprobs = torch.gather(res.logits[:,:-1,:], 2, input_ids[:,1:, None]).squeeze(-1).to(torch.float32)
+        logprobs = logprobs.detach().cpu().numpy()
+        return logprobs.tolist(), float(np.mean(logprobs)) # Normalization by number of tokens      
+    
     def generate(self, request: GenerateRequest) -> Union[GenerateResponse, Exception]:
         try:
             check_batch_size(len(request.text), self.max_batch_size)

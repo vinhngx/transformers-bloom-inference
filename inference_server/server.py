@@ -91,3 +91,16 @@ def generate():
         response = get_exception_response(query_ids.generate_query_id, x.method, args.debug)
         query_ids.generate_query_id += 1
         return response, status.HTTP_500_INTERNAL_SERVER_ERROR
+
+@app.route("/logprob/", methods=["POST"])
+def logprob():
+    try:
+        x = request.get_json()
+        
+        lobprobs, mean_log_prob = model.logprob(x['text'])
+
+        return {'logprobs': lobprobs, 'mean_log_prob': mean_log_prob}, status.HTTP_200_OK
+    except Exception:
+        response = get_exception_response(query_ids.generate_query_id, x.method, args.debug)
+        query_ids.generate_query_id += 1
+        return response, status.HTTP_500_INTERNAL_SERVER_ERROR
