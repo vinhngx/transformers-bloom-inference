@@ -10,6 +10,7 @@ from ...models import Model
 from ...utils import create_generate_request, print_rank_n
 from .pb import generation_pb2, generation_pb2_grpc
 
+import pdb
 
 class GenerationServer(generation_pb2_grpc.GenerationServiceServicer):
     def __init__(self, model: Model) -> None:
@@ -29,18 +30,33 @@ class GenerationServer(generation_pb2_grpc.GenerationServiceServicer):
         torch.cuda.set_device(local_rank)
         self.model.input_device = local_rank
 
-        response = self.model.generate(request)
-
-        if isinstance(response, Exception):
+        # Check request number of token: if > 0 -> Generate, if = 0, calculate logprob
+#         (Pdb) request
+# GenerateRequest(text=['DeepSpeed is a machine learning framework'], min_length=None, do_sample=None, early_stopping=None, temperature=1.0, top_k=None, top_p=1.0, typical_p=None, repetition_penalty=None, bos_token_id=None, pad_token_id=None, eos_token_id=None, length_penalty=None, no_repeat_ngram_size=None, encoder_no_repeat_ngram_size=None, num_return_sequences=None, max_time=None, max_new_tokens=64, decoder_start_token_id=None, diversity_penalty=None, forced_bos_token_id=None, forced_eos_token_id=None, exponential_decay_length_penalty=None, remove_input_from_output=False, method='generate')
+        #pdb.set_trace()
+        if request.max_new_tokens > 0: #generate
+            response = self.model.generate(request)
+            if isinstance(response, Exception):
             # if exception occurs, we don't this subprocess to crash
-            response = generation_pb2.GenerationResponse(error=str(response))
-        else:
-            response = generation_pb2.GenerationResponse(
-                texts=response.text, num_generated_tokens=response.num_generated_tokens
-            )
+                response = generation_pb2.GenerationResponse(error=str(response))
+            else:
+                response = generation_pb2.GenerationResponse(
+                    texts=response.text, num_generated_tokens=response.num_generated_tokens
+                )
 
-        return response
+            return response
+    
+        else: # calculate logprob of the input            
+            try:
+                logprobs = self.model.logprob(request.text)
+                response = generation_pb2.GenerationResponse(
+                    texts=str(logprobs), num_generated_tokens=0
+                )
+            except Exception as e:
+                # if exception occurs, we don't this subprocess to crash
+                response = generation_pb2.GenerationResponse(error=str(e))
 
+            return response        
 
 def serve(inference_pipeline, port):
     server = grpc.server(

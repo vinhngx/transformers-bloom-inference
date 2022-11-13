@@ -20,9 +20,39 @@ bloom-176b:
 	MAX_INPUT_LENGTH=2048 \
 	MAX_BATCH_SIZE=4 \
 	CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+	gunicorn -t 0 -w 1 -b 127.0.0.1:5001 inference_server.server:app --access-logfile - --access-logformat '%(h)s %(t)s "%(r)s" %(s)s %(b)s'
+
+bloom-176b-hf:
+	TOKENIZERS_PARALLELISM=false \
+	MODEL_NAME=bigscience/bloom \
+	DEPLOYMENT_FRAMEWORK=hf_accelerate \
+	DTYPE=fp16 \
+	MAX_INPUT_LENGTH=2048 \
+	MAX_BATCH_SIZE=4 \
+	CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+	gunicorn -t 0 -w 1 -b 127.0.0.1:5000 inference_server.server:app --access-logfile - --access-logformat '%(h)s %(t)s "%(r)s" %(s)s %(b)s'
+    
+bloom-176b-int8-hf:
+	TOKENIZERS_PARALLELISM=false \
+	MODEL_NAME=microsoft/bloom-deepspeed-inference-int8 \
+	DEPLOYMENT_FRAMEWORK=hf_accelerate \
+	DTYPE=int8 \
+	MAX_INPUT_LENGTH=2048 \
+	MAX_BATCH_SIZE=4 \
+	CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+	gunicorn -t 0 -w 1 -b 127.0.0.1:5000 inference_server.server:app --access-logfile - --access-logformat '%(h)s %(t)s "%(r)s" %(s)s %(b)s'
+    
+bloom-176b-int8:
+	TOKENIZERS_PARALLELISM=false \
+	MODEL_NAME=microsoft/bloom-deepspeed-inference-int8 \
+	DEPLOYMENT_FRAMEWORK=ds_inference \
+	DTYPE=int8 \
+	MAX_INPUT_LENGTH=2048 \
+	MAX_BATCH_SIZE=4 \
+	CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 	gunicorn -t 0 -w 1 -b 127.0.0.1:5000 inference_server.server:app --access-logfile - --access-logformat '%(h)s %(t)s "%(r)s" %(s)s %(b)s'
 
-bloom-176b-int8:
+bloom-176b-int8-4gpu:
 	TOKENIZERS_PARALLELISM=false \
 	MODEL_NAME=microsoft/bloom-deepspeed-inference-int8 \
 	DEPLOYMENT_FRAMEWORK=ds_inference \
@@ -51,6 +81,17 @@ bloomz-560m:
 	MAX_BATCH_SIZE=32 \
 	CUDA_VISIBLE_DEVICES=0 \
 	gunicorn -t 0 -w 1 -b 127.0.0.1:5000 inference_server.server:app --access-logfile - --access-logformat '%(h)s %(t)s "%(r)s" %(s)s %(b)s'
+
+bloomz-560m-ds:
+	TOKENIZERS_PARALLELISM=false \
+	MODEL_NAME=bigscience/bloom-560m \
+	DEPLOYMENT_FRAMEWORK=ds_inference \
+	DTYPE=fp16 \
+	MAX_INPUT_LENGTH=2048 \
+	MAX_BATCH_SIZE=32 \
+	CUDA_VISIBLE_DEVICES=0 \
+	gunicorn -t 0 -w 1 -b 127.0.0.1:5000 inference_server.server:app --access-logfile - --access-logformat '%(h)s %(t)s "%(r)s" %(s)s %(b)s'
+
 
 flan-t5-xxl:
 	TOKENIZERS_PARALLELISM=false \

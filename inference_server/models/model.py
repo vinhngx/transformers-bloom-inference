@@ -26,8 +26,9 @@ class Model:
         self,
         context: str,      
     ) -> float:
+        # Note: for DS model, use generate with "max_new_tokens=0" instead!
         
-        input_ids = self.tokenizer(context, return_tensors="pt").input_ids
+        input_ids = self.tokenizer(context, return_tensors="pt").input_ids.cuda()
         # forward pass to get next token
         res = self.model.forward(input_ids)
         # omit the 1st token
