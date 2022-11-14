@@ -12,6 +12,7 @@ from transformers.utils import is_offline_mode
 
 from ..utils import GenerateRequest, GenerateResponse, GenerationMixin, TokenizeRequest, TokenizeResponse, run_rank_n
 
+MAX_TOKEN_LEN = 2048
 
 class Model:
     def __init__(self, args: argparse.Namespace) -> None:
@@ -28,7 +29,7 @@ class Model:
     ) -> float:
         # Note: for DS model, use generate with "max_new_tokens=0" instead!
         
-        input_ids = self.tokenizer(context, return_tensors="pt").input_ids.cuda()
+        input_ids = self.tokenizer(context, return_tensors="pt").input_ids[-MAX_TOKEN_LEN:].cuda() #Trim the beginning to prevent token len > MAX_TOKEN_LEN
         # forward pass to get next token
         res = self.model.forward(input_ids)
         # omit the 1st token

@@ -20,6 +20,16 @@ bloom-176b:
 	MAX_INPUT_LENGTH=2048 \
 	MAX_BATCH_SIZE=4 \
 	CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+	gunicorn -t 0 -w 1 -b 127.0.0.1:5000 inference_server.server:app --access-logfile - --access-logformat '%(h)s %(t)s "%(r)s" %(s)s %(b)s'
+
+bloom-176b-int8:
+	TOKENIZERS_PARALLELISM=false \
+	MODEL_NAME=microsoft/bloom-deepspeed-inference-int8 \
+	DEPLOYMENT_FRAMEWORK=ds_inference \
+	DTYPE=int8 \
+	MAX_INPUT_LENGTH=2048 \
+	MAX_BATCH_SIZE=4 \
+	CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 	gunicorn -t 0 -w 1 -b 127.0.0.1:5001 inference_server.server:app --access-logfile - --access-logformat '%(h)s %(t)s "%(r)s" %(s)s %(b)s'
 
 bloom-176b-hf:
@@ -42,16 +52,6 @@ bloom-176b-int8-hf:
 	CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 	gunicorn -t 0 -w 1 -b 127.0.0.1:5000 inference_server.server:app --access-logfile - --access-logformat '%(h)s %(t)s "%(r)s" %(s)s %(b)s'
     
-bloom-176b-int8:
-	TOKENIZERS_PARALLELISM=false \
-	MODEL_NAME=microsoft/bloom-deepspeed-inference-int8 \
-	DEPLOYMENT_FRAMEWORK=ds_inference \
-	DTYPE=int8 \
-	MAX_INPUT_LENGTH=2048 \
-	MAX_BATCH_SIZE=4 \
-	CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
-	gunicorn -t 0 -w 1 -b 127.0.0.1:5000 inference_server.server:app --access-logfile - --access-logformat '%(h)s %(t)s "%(r)s" %(s)s %(b)s'
-
 bloom-176b-int8-4gpu:
 	TOKENIZERS_PARALLELISM=false \
 	MODEL_NAME=microsoft/bloom-deepspeed-inference-int8 \
@@ -60,7 +60,7 @@ bloom-176b-int8-4gpu:
 	MAX_INPUT_LENGTH=2048 \
 	MAX_BATCH_SIZE=4 \
 	CUDA_VISIBLE_DEVICES=0,1,2,3 \
-	gunicorn -t 0 -w 1 -b 127.0.0.1:5000 inference_server.server:app --access-logfile - --access-logformat '%(h)s %(t)s "%(r)s" %(s)s %(b)s'
+	gunicorn -t 0 -w 1 -b 127.0.0.1:5001 inference_server.server:app --access-logfile - --access-logformat '%(h)s %(t)s "%(r)s" %(s)s %(b)s'
     
 bloomz-176b:
 	TOKENIZERS_PARALLELISM=false \
